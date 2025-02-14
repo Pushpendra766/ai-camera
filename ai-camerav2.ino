@@ -1,24 +1,3 @@
-/*
-  ESP32-CAM Image Analysis with OpenAI API and OLED Display
-
-  This code captures an image using the ESP32-CAM module, processes it, 
-  and sends it to OpenAI's GPT-4o API for analysis. The API's response is 
-  displayed on an OLED screen. The code also provides audio feedback using 
-  a buzzer and includes features like Wi-Fi connectivity, image encoding, 
-  and scrolling text display.
-
-  Tested with:
-  - Arduino IDE version 2.3.2
-  - ESP32 boards package version 3.0.0
-  - Adafruit GFX library version 1.11.11
-  - Adafruit SSD1306 library version 2.5.13
-  - ArduinoJson library version 7.1.0
-  - Base64 library (default version with ESP32 boards package)
-
-  Make sure to install these libraries and configure your environment 
-  as specified above before running the code.
-*/
-
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <Base64.h>
@@ -34,7 +13,6 @@ const char* password = "wifi_pass";
 
 // OpenAI API key
 const String apiKey = "openai_key";
-
 
 // OLED display settings
 #define SCREEN_WIDTH 128
@@ -287,8 +265,8 @@ void AnalyzeImage(const String& base64Image, const String& prompt,  const String
     // Smooth scrolling and proper word wrapping
     display.clearBuffer();
     int lineHeight = 8;     // Height of each line in pixels
-    int maxLineChars = 21;  // Approx. max characters per line
-    int visibleLines = 7;
+    int maxLineChars = 20;  // Approx. max characters per line
+    int visibleLines = 8;
     int scrollDelay = 2000;  // Delay for scrolling in milliseconds
 
     std::vector<String> lines;  // Store formatted lines for display
@@ -318,7 +296,7 @@ void AnalyzeImage(const String& base64Image, const String& prompt,  const String
     for (size_t i = 0; i < lines.size(); i++) {
       display.clearBuffer();
       for (size_t j = 0; j < visibleLines && (i + j) < lines.size(); j++) {
-        display.drawStr(0, j * lineHeight, lines[i + j].c_str());
+        display.drawStr(0, (j * lineHeight) + 10, lines[i + j].c_str());  // Added +10 pixels offset
       }
       display.sendBuffer();
       delay(scrollDelay);
@@ -366,9 +344,6 @@ bool sendPostRequest(const String& payload, String& result) {
   }
 }
 
-
-// Remaining code remains unchanged...
-
 void loop() {
   if (digitalRead(SUMMARIZE_BUTTON_PIN) == LOW) {
     Serial.println("Summarize button pressed! Capturing image...");
@@ -380,7 +355,7 @@ void loop() {
     delay(1000);  // Small delay to debounce button press
   } else if (digitalRead(SOLVE_BUTTON_PIN) == LOW) {
     Serial.println("Solve button pressed! Capturing image...");
-    captureAndAnalyzeImage("Solve the math problem in the image. In the output show very very very short solution or just the answer.", "Solving...");
+    captureAndAnalyzeImage("Solve the math problem in the image. In the output just show the answer in this format - Answer: ", "Solving...");
     delay(1000);  // Small delay to debounce button press
   }
 }
